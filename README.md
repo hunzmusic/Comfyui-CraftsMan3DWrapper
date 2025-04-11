@@ -1,4 +1,4 @@
-# ComfyUI-CraftsManWrapper
+# ComfyUI-CraftsMan3DWrapper
 
 This custom node package provides nodes for ComfyUI to generate 3D coarse meshes from images using the CraftsMan3D model, specifically the version utilizing DoraVAE.
 
