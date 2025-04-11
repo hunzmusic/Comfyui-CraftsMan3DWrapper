@@ -1,0 +1,83 @@
+name: craftsman/craftsman-doravae
+description: 'image to 3d shape diffusion of CraftsMan3D(https://github.com/wyysf-98/CraftsMan3D) and DoraVAE version(https://aruichen.github.io/Dora/)'
+
+system_type: shape-rectified-flow-system
+system:
+  z_scale_factor: 1.0
+  guidance_scale: 7.5
+  num_inference_steps: 50
+  eta: 0.0
+  extract_mesh_func: mc
+  shape_model_type: dora-autoencoder
+  shape_model:
+    n_samples: 16384
+    with_sharp_data: true
+    use_downsample: true
+    num_latents: 2048
+    embed_dim: 64
+    point_feats: 3
+    out_dim: 1
+    num_freqs: 8
+    include_pi: false
+    heads: 12
+    width: 768
+    num_encoder_layers: 8
+    num_decoder_layers: 16
+    use_ln_post: true
+    init_scale: 0.25
+    qkv_bias: false
+    use_flash: true
+    use_checkpoint: true
+  condition_model_type: "dinov2-embedder"
+  condition_model:
+    dino_type: "dinov2-with-registers-large"
+    encode_camera: false
+    n_views: 1
+    empty_embeds_ratio: 0.1
+    normalize_embeds: false
+    zero_uncond_embeds: true
+    image_size_dino: 518
+  denoiser_model_type: pixart-denoiser
+  denoiser_model:
+    input_channels: 64
+    output_channels: 64
+    n_ctx: 2048
+    width: 1280
+    layers: 32
+    heads: 20
+    context_dim: 1024
+    init_scale: 1.0
+    use_checkpoint: true
+    condition_type: dinov2
+    use_RMSNorm: true
+    qkv_fuse: false
+  noise_scheduler_type: diffusers.schedulers.FlowMatchEulerDiscreteScheduler
+  noise_scheduler:
+    num_train_timesteps: 1000
+    shift: 3.0
+  denoise_scheduler_type: diffusers.schedulers.FlowMatchEulerDiscreteScheduler
+  denoise_scheduler:
+    num_train_timesteps: 1000
+    shift: 3.0
+  val_samples_json: ""
+  loggers:
+    wandb:
+      enable: false
+      project: CraftsMan
+      name: image-to-shape-diffusion
+  loss:
+    loss_type: mse
+    lambda_diffusion: 1.0
+  optimizer:
+    name: AdamW
+    args:
+      lr: 0.0002
+      betas:
+      - 0.9
+      - 0.99
+      eps: 1.0e-06
+  scheduler:
+    name: CosineAnnealingLR
+    args:
+      T_max: 5
+      eta_min: 1.0e-06

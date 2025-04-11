@@ -7,6 +7,9 @@ from diffusers import DDIMScheduler
 from torchvision import transforms
 from craftsman.utils.typing import *
 
+from comfy.utils import ProgressBar
+
+
 def get_sigmas(noise_scheduler, timesteps, n_dim=4, dtype=torch.float32):
     sigmas = noise_scheduler.sigmas.to(device=timesteps.device, dtype=dtype)
     schedule_timesteps = noise_scheduler.timesteps.to(timesteps.device)
@@ -270,7 +273,9 @@ def flow_sample(scheduler: DDIMScheduler,
 
     # reverse
     distance = (timesteps[:-1] - timesteps[1:]) / scheduler.config.num_train_timesteps
-    for i, t in enumerate(tqdm(timesteps[:-1], disable=disable_prog, desc="Flow Sampling:", leave=False)):
+    comfy_pbar = ProgressBar(len(timesteps[:-1]))
+  
+    for i, t in enumerate(tqdm(timesteps[:-1], disable=disable_prog, desc="Flow Sampling:", leave=True)):
         # expand the latents if we are doing classifier free guidance
         latent_model_input = (
             torch.cat([latents] * 2)
@@ -291,6 +296,7 @@ def flow_sample(scheduler: DDIMScheduler,
 
         # compute the previous noisy sample x_t -> x_t-1
         latents = latents - distance[i] * noise_pred
+        comfy_pbar.update(1)
 
         yield latents, t
 

@@ -12,6 +12,11 @@ from omegaconf import OmegaConf
 import tempfile
 import hashlib
 
+from tqdm import tqdm
+
+from accelerate import init_empty_weights
+from accelerate.utils import set_module_tensor_to_device
+
 import traceback # Import traceback for detailed error logging
 
 # Craftsman code is now expected to be within this package directory
@@ -110,72 +115,59 @@ class LoadCraftsManPipeline:
     """Loads the CraftsMan pipeline object."""
     @classmethod
     def INPUT_TYPES(s):
-        # Define default model path - adjust if needed
-        default_model_path = "craftsman3d/craftsman-doravae"
-        # Check if local model exists inside ComfyUI's models directory
-        # Get the base models directory used by ComfyUI
-        model_dir = folder_paths.get_folder_paths("checkpoints")[0] # Often checkpoints/models share base path
-        # Construct the expected path within the models directory
-        local_model_path = os.path.join(model_dir, 'craftman-DoraVAE')
-
-        if os.path.isdir(local_model_path):
-             default_model_path = local_model_path
-             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Defaulting to local model path in ComfyUI models: {local_model_path}")
-        else:
-             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Local model path '{local_model_path}' not found. Defaulting to Hugging Face ID.")
-
         return {
             "required": {
-                 "model_path": ("STRING", {"default": default_model_path, "multiline": False}),
+                "model": (folder_paths.get_filename_list("checkpoints"), {"tooltip": "These models are loaded from the 'ComfyUI/models/checkpoints' -folder",}),
             }
         }
 
-    # Define a custom type name for the pipeline object if needed, or use generic
-    # For simplicity, let's assume it can be passed directly for now.
-    # ComfyUI might require specific handling for custom objects.
     RETURN_TYPES = ("CRAFTSMAN_PIPELINE",)
     RETURN_NAMES = ("pipeline",)
     FUNCTION = "load_pipeline"
     CATEGORY = "generation/3d/craftsman"
 
-    def load_pipeline(self, model_path):
+    def load_pipeline(self, model):
         if not CRAFTSMAN_AVAILABLE:
              raise ImportError("CraftsMan library is not available or failed to import. Cannot proceed.")
+        
+        model_path = folder_paths.get_full_path_or_raise("checkpoints", model)
+        config_path = os.path.join(script_directory, 'craftsman', 'config', 'config.yaml')
+        cfg = load_config(config_path)
 
         device = comfy.model_management.get_torch_device()
+        offload_device = comfy.model_management.unet_offload_device()
         dtype = torch.bfloat16 if comfy.model_management.should_use_bf16() else torch.float16
-        cache_key = (model_path, str(device), str(dtype))
-
-        if cache_key in loaded_pipeline_cache:
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Using cached pipeline for {model_path}.")
-            pipeline = loaded_pipeline_cache[cache_key]
-            # Ensure model is on the correct device before returning
-            pipeline.system.to(device)
-            return (pipeline,)
 
         print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Loading pipeline from: {model_path}")
         pbar = comfy.utils.ProgressBar(1)
         pbar.update(0)
-        try:
-            if not os.path.isdir(model_path):
-                 print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Model path '{model_path}' not found locally, attempting download...")
+        
+        sd = comfy.utils.load_torch_file(model_path, device=offload_device)
+        with init_empty_weights():
+            system = craftsman.find(cfg.system_type)(cfg.system)
 
-            pipeline = CraftsManPipeline.from_pretrained(
-                model_path,
-                device=device,
-                torch_dtype=dtype
-            )
-            pipeline.system.to(device) # Ensure it's on device
-            loaded_pipeline_cache[cache_key] = pipeline
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Pipeline loaded successfully.")
-            pbar.update(1)
-            return (pipeline,) # Return as a tuple
-        except Exception as e:
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Error loading pipeline: {e}")
-            if cache_key in loaded_pipeline_cache: del loaded_pipeline_cache[cache_key]
-            pbar.update(1)
-            raise RuntimeError(f"Failed to load CraftsMan pipeline from {model_path}: {e}")
+        system.eval()
 
+        params_to_keep = ["shape_model"] #shape model doesn't support bf16
+        param_count = sum(1 for _ in system.named_parameters())
+        for name, param in tqdm(system.named_parameters(), 
+                desc=f"Loading transformer parameters to {device}", 
+                total=param_count,
+                leave=True):
+            if dtype != torch.float32:
+                dtype_to_use = torch.float16 if any(keyword in name for keyword in params_to_keep) else dtype
+            else:
+                dtype_to_use = torch.float32
+            set_module_tensor_to_device(system, name, device=device, dtype=dtype_to_use, value=sd[name])
+        
+        if dtype != torch.float32:
+            system.shape_model = system.shape_model.to(torch.float16) # shape vae only support fp16
+            system.condition = system.condition.to(torch.bfloat16)
+            system.denoiser_model = system.denoiser_model.to(torch.bfloat16)
+        
+        pipeline = CraftsManPipeline(device, cfg, system)
+
+        return pipeline,
 
 class PreprocessImageCraftsMan:
     """Preprocesses an image for the CraftsMan pipeline."""
