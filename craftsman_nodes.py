@@ -4,13 +4,15 @@ import torch
 import numpy as np
 import PIL.Image
 import trimesh
-import rembg
 import folder_paths
 import comfy.model_management
 import comfy.utils
-from omegaconf import OmegaConf
-import tempfile
 import hashlib
+
+from tqdm import tqdm
+
+from accelerate import init_empty_weights
+from accelerate.utils import set_module_tensor_to_device
 
 import traceback # Import traceback for detailed error logging
 
@@ -110,72 +112,59 @@ class LoadCraftsManPipeline:
     """Loads the CraftsMan pipeline object."""
     @classmethod
     def INPUT_TYPES(s):
-        # Define default model path - adjust if needed
-        default_model_path = "craftsman3d/craftsman-doravae"
-        # Check if local model exists inside ComfyUI's models directory
-        # Get the base models directory used by ComfyUI
-        model_dir = folder_paths.get_folder_paths("checkpoints")[0] # Often checkpoints/models share base path
-        # Construct the expected path within the models directory
-        local_model_path = os.path.join(model_dir, 'craftman-DoraVAE')
-
-        if os.path.isdir(local_model_path):
-             default_model_path = local_model_path
-             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Defaulting to local model path in ComfyUI models: {local_model_path}")
-        else:
-             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Local model path '{local_model_path}' not found. Defaulting to Hugging Face ID.")
-
         return {
             "required": {
-                 "model_path": ("STRING", {"default": default_model_path, "multiline": False}),
+                "model": (folder_paths.get_filename_list("checkpoints"), {"tooltip": "These models are loaded from the 'ComfyUI/models/checkpoints' -folder",}),
             }
         }
 
-    # Define a custom type name for the pipeline object if needed, or use generic
-    # For simplicity, let's assume it can be passed directly for now.
-    # ComfyUI might require specific handling for custom objects.
     RETURN_TYPES = ("CRAFTSMAN_PIPELINE",)
     RETURN_NAMES = ("pipeline",)
     FUNCTION = "load_pipeline"
     CATEGORY = "generation/3d/craftsman"
 
-    def load_pipeline(self, model_path):
+    def load_pipeline(self, model):
         if not CRAFTSMAN_AVAILABLE:
              raise ImportError("CraftsMan library is not available or failed to import. Cannot proceed.")
+        
+        model_path = folder_paths.get_full_path_or_raise("checkpoints", model)
+        config_path = os.path.join(script_directory, 'craftsman', 'config', 'config.yaml')
+        cfg = load_config(config_path)
 
         device = comfy.model_management.get_torch_device()
+        offload_device = comfy.model_management.unet_offload_device()
         dtype = torch.bfloat16 if comfy.model_management.should_use_bf16() else torch.float16
-        cache_key = (model_path, str(device), str(dtype))
-
-        if cache_key in loaded_pipeline_cache:
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Using cached pipeline for {model_path}.")
-            pipeline = loaded_pipeline_cache[cache_key]
-            # Ensure model is on the correct device before returning
-            pipeline.system.to(device)
-            return (pipeline,)
 
         print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Loading pipeline from: {model_path}")
         pbar = comfy.utils.ProgressBar(1)
         pbar.update(0)
-        try:
-            if not os.path.isdir(model_path):
-                 print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Model path '{model_path}' not found locally, attempting download...")
+        
+        sd = comfy.utils.load_torch_file(model_path, device=offload_device)
+        with init_empty_weights():
+            system = craftsman.find(cfg.system_type)(cfg.system)
 
-            pipeline = CraftsManPipeline.from_pretrained(
-                model_path,
-                device=device,
-                torch_dtype=dtype
-            )
-            pipeline.system.to(device) # Ensure it's on device
-            loaded_pipeline_cache[cache_key] = pipeline
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Pipeline loaded successfully.")
-            pbar.update(1)
-            return (pipeline,) # Return as a tuple
-        except Exception as e:
-            print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Error loading pipeline: {e}")
-            if cache_key in loaded_pipeline_cache: del loaded_pipeline_cache[cache_key]
-            pbar.update(1)
-            raise RuntimeError(f"Failed to load CraftsMan pipeline from {model_path}: {e}")
+        system.eval()
 
+        params_to_keep = ["shape_model"] #shape model doesn't support bf16
+        param_count = sum(1 for _ in system.named_parameters())
+        for name, param in tqdm(system.named_parameters(), 
+                desc=f"Loading transformer parameters to {device}", 
+                total=param_count,
+                leave=True):
+            if dtype != torch.float32:
+                dtype_to_use = torch.float16 if any(keyword in name for keyword in params_to_keep) else dtype
+            else:
+                dtype_to_use = torch.float32
+            set_module_tensor_to_device(system, name, device=device, dtype=dtype_to_use, value=sd[name])
+        
+        if dtype != torch.float32:
+            system.shape_model = system.shape_model.to(torch.float16) # shape vae only support fp16
+            system.condition = system.condition.to(torch.bfloat16)
+            system.denoiser_model = system.denoiser_model.to(torch.bfloat16)
+        
+        pipeline = CraftsManPipeline(device, cfg, system)
+
+        return pipeline,
 
 class PreprocessImageCraftsMan:
     """Preprocesses an image for the CraftsMan pipeline."""
@@ -300,14 +289,15 @@ class SampleCraftsManLatents:
             # Let's wrap it in the standard dict format for clarity, even if shape differs.
             latent_dict = {"samples": latent_result.to(comfy.model_management.intermediate_device())}
 
-            # Move pipeline back to CPU after use? ComfyUI should handle this.
-            # comfy.model_management.unload_model_clones(pipeline.system)
+            pipeline.system.to("cpu")
+            comfy.model_management.soft_empty_cache()
 
             return (latent_dict,)
 
         except Exception as e:
             print(f"[ComfyUI-CraftsManWrapper] SampleLatents: Error during latent sampling: {e}")
-            # comfy.model_management.unload_model_clones(pipeline.system)
+            pipeline.system.to("cpu")
+            comfy.model_management.soft_empty_cache()
             raise RuntimeError(f"Latent sampling failed: {e}")
 
 
@@ -506,23 +496,10 @@ class CraftsManDoraVAEGenerator:
     """
     @classmethod
     def INPUT_TYPES(s):
-        # Define default model path - adjust if needed
-        default_model_path = "craftsman3d/craftsman-doravae"
-        # Check if local model exists inside ComfyUI's models directory
-        model_dir = folder_paths.get_folder_paths("checkpoints")[0] # Use the same logic as the loader node
-        local_model_path = os.path.join(model_dir, 'craftman-DoraVAE')
-
-        if os.path.isdir(local_model_path):
-             default_model_path = local_model_path
-             print(f"[ComfyUI-CraftsManWrapper] Generator: Defaulting to local model path in ComfyUI models: {local_model_path}")
-        else:
-             print(f"[ComfyUI-CraftsManWrapper] Local model path '{local_model_path}' not found. Defaulting to Hugging Face ID.")
-
-
         return {
             "required": {
+                "pipeline": ("CRAFTSMAN_PIPELINE",),
                 "image": ("IMAGE",),
-                "model_path": ("STRING", {"default": default_model_path, "multiline": False}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "steps": ("INT", {"default": 50, "min": 1, "max": 200}),
                 "guidance_scale": ("FLOAT", {"default": 7.5, "min": 1.0, "max": 20.0, "step": 0.1}),
@@ -541,52 +518,8 @@ class CraftsManDoraVAEGenerator:
     FUNCTION = "generate_mesh"
     CATEGORY = "generation/3d" # You might want to change this category
 
-    def load_pipeline(self, model_path, device, dtype):
-        """Loads the pipeline, using cache if possible."""
-        global loaded_pipeline_cache
-        cache_key = (model_path, str(device), str(dtype))
 
-        if cache_key in loaded_pipeline_cache:
-            print(f"[ComfyUI-CraftsManWrapper] Using cached pipeline for {model_path}.")
-            # Ensure model is on the correct device
-            pipeline = loaded_pipeline_cache[cache_key]
-            pipeline.system.to(device) # Move system (main model part) to device
-            return pipeline
-
-        print(f"[ComfyUI-CraftsManWrapper] Loading CraftsMan pipeline from: {model_path}")
-        # Unload other models managed by ComfyUI if necessary to free VRAM
-        # comfy.model_management.unload_all_models() # Be cautious with this, might impact other nodes
-
-        # Create a progress bar context
-        pbar = comfy.utils.ProgressBar(1)
-        pbar.update(0) # Initialize
-
-        try:
-            # Check if path exists locally before trying HF Hub
-            if not os.path.isdir(model_path):
-                 print(f"[ComfyUI-CraftsManWrapper] Model path '{model_path}' not found locally, attempting download from Hugging Face Hub...")
-
-            pipeline = CraftsManPipeline.from_pretrained(
-                model_path,
-                device=device, # Load directly to target device if possible
-                torch_dtype=dtype
-            )
-            # Ensure the entire system is on the correct device after loading
-            pipeline.system.to(device)
-            loaded_pipeline_cache[cache_key] = pipeline
-            print(f"[ComfyUI-CraftsManWrapper] Pipeline loaded successfully.")
-            pbar.update(1) # Mark as complete
-            return pipeline
-        except Exception as e:
-            print(f"[ComfyUI-CraftsManWrapper] Error loading pipeline: {e}")
-            # Clean cache entry if loading failed
-            if cache_key in loaded_pipeline_cache:
-                del loaded_pipeline_cache[cache_key]
-            pbar.update(1) # Ensure progress bar finishes
-            raise RuntimeError(f"Failed to load CraftsMan pipeline from {model_path}: {e}")
-
-
-    def generate_mesh(self, image, model_path, seed, steps, guidance_scale, octree_depth,
+    def generate_mesh(self, pipeline, image, seed, steps, guidance_scale, octree_depth,
                       foreground_ratio=0.95, force_remove_bg=False, only_max_component=False,
                       output_filename_prefix="craftsman_mesh"):
 
@@ -596,9 +529,6 @@ class CraftsManDoraVAEGenerator:
         # Determine device and dtype
         device = comfy.model_management.get_torch_device()
         dtype = torch.bfloat16 if comfy.model_management.should_use_bf16() else torch.float16
-
-        # --- Model Loading ---
-        pipeline = self.load_pipeline(model_path, device, dtype)
 
         # --- Input Processing ---
         try:
@@ -636,6 +566,7 @@ class CraftsManDoraVAEGenerator:
             print("[ComfyUI-CraftsManWrapper] Sampling latents...")
             # Directly call system.sample for potentially more control or progress reporting
             sample_inputs_dict = {'image': [processed_image_for_sampling]} # Use the preprocessed image
+            pipeline.system.to(device)
             latents = pipeline.system.sample(
                 sample_inputs_dict,
                 sample_times=1, # Generate one mesh
@@ -715,7 +646,7 @@ class CraftsManDoraVAEGenerator:
                 img_hash = hashlib.sha256(image.cpu().numpy().tobytes()).hexdigest()[:8]
             except:
                 img_hash = "noimg" # Fallback if hashing fails
-            inputs_hash = hashlib.md5(f"{model_path}{seed}{steps}{guidance_scale}{octree_depth}{foreground_ratio}{force_remove_bg}{only_max_component}{img_hash}".encode()).hexdigest()[:8]
+            inputs_hash = hashlib.md5(f"{seed}{steps}{guidance_scale}{octree_depth}{foreground_ratio}{force_remove_bg}{only_max_component}{img_hash}".encode()).hexdigest()[:8]
             # Combine the base filename from prefix (if any) with hash and extension (defaulting to obj)
             filename_part = f"{prefix_filename}_{inputs_hash}.obj"
 
@@ -735,9 +666,8 @@ class CraftsManDoraVAEGenerator:
              raise RuntimeError(f"Mesh generation or saving failed: {e}")
         finally:
             # Ensure model is unloaded even if saving fails but generation succeeded
-            # Check if pipeline was successfully loaded before trying to unload
-            if 'pipeline' in locals() and pipeline is not None and hasattr(pipeline, 'system'):
-                 comfy.model_management.unload_model_clones(pipeline.system) # Let ComfyUI manage this
+            pipeline.system.to("cpu")
+            comfy.model_management.soft_empty_cache()
 
         return (filepath,)
 
@@ -760,5 +690,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DecodeCraftsManLatents": "Decode CraftsMan Latents",
     "SaveCraftsManMesh": "Save CraftsMan Mesh (OBJ)",
 }
-
-print("[ComfyUI-CraftsManWrapper] Loaded CraftsMan custom nodes.")
