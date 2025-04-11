@@ -1,0 +1,988 @@
+{
+  "id": "38c5b16a-bb22-46f8-921b-14d25642be68",
+  "revision": 0,
+  "last_node_id": 35,
+  "last_link_id": 70,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "SampleCraftsManLatents",
+      "pos": [
+        94.3319320678711,
+        855.3016967773438
+      ],
+      "size": [
+        405.5999755859375,
+        150
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 20
+        },
+        {
+          "name": "preprocessed_image",
+          "type": "IMAGE_PIL",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "shape_latents",
+          "type": "LATENT",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SampleCraftsManLatents"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        50,
+        7.5
+      ]
+    },
+    {
+      "id": 12,
+      "type": "SaveCraftsManMesh",
+      "pos": [
+        897.3031005859375,
+        861.1575927734375
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh_vf",
+          "type": "GEOMETRY_VF",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh_path",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveCraftsManMesh"
+      },
+      "widgets_values": [
+        true,
+        "craftsman_mesh",
+        "glb"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Preview3D",
+      "pos": [
+        1271.992919921875,
+        767.2316284179688
+      ],
+      "size": [
+        730,
+        764.9091186523438
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "widget": {
+            "name": "model_file"
+          },
+          "link": 24
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "Preview3D",
+        "Camera Info": {
+          "position": {
+            "x": -2.944256748201132,
+            "y": 10.376407198451384,
+            "z": 5.357680200810012
+          },
+          "target": {
+            "x": -0.2031660792889942,
+            "y": 1.7243251856729973,
+            "z": -0.06914277081445368
+          },
+          "zoom": 1,
+          "cameraType": "perspective"
+        },
+        "Material Mode": "normal",
+        "Show Grid": true
+      },
+      "widgets_values": [
+        "D:/AIImage/ComfyUI_windows_portable_nvidia_3D/ComfyUI_windows_portable/ComfyUI/output/craftsman_mesh_037e4ebb.glb",
+        ""
+      ]
+    },
+    {
+      "id": 26,
+      "type": "SampleCraftsManLatents",
+      "pos": [
+        122.56537628173828,
+        1686.27392578125
+      ],
+      "size": [
+        405.5999755859375,
+        150
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 67
+        },
+        {
+          "name": "preprocessed_image",
+          "type": "IMAGE_PIL",
+          "link": 61
+        }
+      ],
+      "outputs": [
+        {
+          "name": "shape_latents",
+          "type": "LATENT",
+          "links": [
+            62
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SampleCraftsManLatents"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        50,
+        7.5
+      ]
+    },
+    {
+      "id": 28,
+      "type": "SaveCraftsManMesh",
+      "pos": [
+        925.5371704101562,
+        1692.1297607421875
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh_vf",
+          "type": "GEOMETRY_VF",
+          "link": 63
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh_path",
+          "type": "STRING",
+          "links": [
+            64
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveCraftsManMesh"
+      },
+      "widgets_values": [
+        true,
+        "craftsman_mesh",
+        "glb"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "PreprocessImageCraftsMan",
+      "pos": [
+        -293.72064208984375,
+        838.7782592773438
+      ],
+      "size": [
+        352.79998779296875,
+        174
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 60
+        },
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_tensor",
+          "type": "IMAGE",
+          "links": [
+            70
+          ]
+        },
+        {
+          "name": "image_pil",
+          "type": "IMAGE_PIL",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreprocessImageCraftsMan"
+      },
+      "widgets_values": [
+        0.9000000000000001,
+        false,
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "id": 25,
+      "type": "PreprocessImageCraftsMan",
+      "pos": [
+        -265.4871826171875,
+        1669.75048828125
+      ],
+      "size": [
+        352.79998779296875,
+        174
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 65
+        },
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 66
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_tensor",
+          "type": "IMAGE",
+          "links": [
+            69
+          ]
+        },
+        {
+          "name": "image_pil",
+          "type": "IMAGE_PIL",
+          "links": [
+            61
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreprocessImageCraftsMan"
+      },
+      "widgets_values": [
+        0.9000000000000001,
+        false,
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "id": 33,
+      "type": "Note",
+      "pos": [
+        528.5947875976562,
+        619.8281860351562
+      ],
+      "size": [
+        309.6012268066406,
+        190.67999267578125
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "An octree_depth of 7 means a 27 x 27 x 27 = 128x128x128 grid.\nAn octree_depth of 8 (the default) means a 28 x 28 x 28 = 256x256x256"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 30,
+      "type": "PreviewImage",
+      "pos": [
+        125.34281158447266,
+        1887.3936767578125
+      ],
+      "size": [
+        403.60003662109375,
+        467.42999267578125
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 69
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 31,
+      "type": "PreviewImage",
+      "pos": [
+        95.09288787841797,
+        1051.2835693359375
+      ],
+      "size": [
+        413.2799987792969,
+        556.9700317382812
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 70
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 8,
+      "type": "LoadCraftsManPipeline",
+      "pos": [
+        86.49141693115234,
+        399.493896484375
+      ],
+      "size": [
+        355.4958801269531,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "links": [
+            17,
+            20,
+            22,
+            66,
+            67,
+            68
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadCraftsManPipeline"
+      },
+      "widgets_values": [
+        "D:\\AIImage\\ComfyUI_windows_portable_nvidia_3D\\ComfyUI_windows_portable\\craftman-DoraVAE"
+      ]
+    },
+    {
+      "id": 35,
+      "type": "Note",
+      "pos": [
+        -1334.21337890625,
+        606.6055297851562
+      ],
+      "size": [
+        316.2127990722656,
+        186.54776000976562
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "It can accept nonsquare ratios."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 14,
+      "type": "RMBG",
+      "pos": [
+        -954.8430786132812,
+        843.34375
+      ],
+      "size": [
+        315,
+        290
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            45,
+            58,
+            65
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "slot_index": 1,
+          "links": [
+            57
+          ]
+        },
+        {
+          "name": "MASK_IMAGE",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-rmbg",
+        "ver": "73b7bf08fbd904a005091d2d755ef1d950469219",
+        "Node name for S&R": "RMBG"
+      },
+      "widgets_values": [
+        "INSPYRENET",
+        1,
+        2048,
+        0,
+        0,
+        "white",
+        false,
+        "default",
+        false
+      ]
+    },
+    {
+      "id": 23,
+      "type": "ETN_ApplyMaskToImage",
+      "pos": [
+        -952.39501953125,
+        1177.74658203125
+      ],
+      "size": [
+        239.40000915527344,
+        46
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 58
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 57
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            60
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-tooling-nodes",
+        "ver": "2.0.1",
+        "Node name for S&R": "ETN_ApplyMaskToImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 32,
+      "type": "Note",
+      "pos": [
+        -292.10723876953125,
+        599.9525756835938
+      ],
+      "size": [
+        351.75,
+        190.67999267578125
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Sending an image with an alpha works better then it doing it itself.  So I've included step with the alpha being added.\n\nforeground_ratio : scales the image. \n1 is the original size \n0.5 is half the size"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 34,
+      "type": "Note",
+      "pos": [
+        91.9446792602539,
+        607.8880615234375
+      ],
+      "size": [
+        401.56121826171875,
+        189.46998596191406
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "You can send it 4k images if you want\n\nThis encoder, DINOv2, internally resizes the image it receives to its required 518x518 input size.\n\n\n\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        -1330.966064453125,
+        841.5249633789062
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            31
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "cauterized_high_resolution_3d_render_of_a_diner_style_booth_ben_6fcac2ea-22be-45e4-a9e7-63fe3b3d9927.png",
+        "image",
+        ""
+      ]
+    },
+    {
+      "id": 11,
+      "type": "DecodeCraftsManLatents",
+      "pos": [
+        535.1044311523438,
+        865.5122680664062
+      ],
+      "size": [
+        315,
+        78
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 22
+        },
+        {
+          "name": "shape_latents",
+          "type": "LATENT",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh_vf",
+          "type": "GEOMETRY_VF",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DecodeCraftsManLatents"
+      },
+      "widgets_values": [
+        9
+      ]
+    },
+    {
+      "id": 27,
+      "type": "DecodeCraftsManLatents",
+      "pos": [
+        563.33837890625,
+        1696.4844970703125
+      ],
+      "size": [
+        315,
+        78
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "link": 68
+        },
+        {
+          "name": "shape_latents",
+          "type": "LATENT",
+          "link": 62
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh_vf",
+          "type": "GEOMETRY_VF",
+          "links": [
+            63
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DecodeCraftsManLatents"
+      },
+      "widgets_values": [
+        9
+      ]
+    },
+    {
+      "id": 29,
+      "type": "Preview3D",
+      "pos": [
+        1266.0928955078125,
+        1583.562744140625
+      ],
+      "size": [
+        730,
+        764.9091186523438
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "widget": {
+            "name": "model_file"
+          },
+          "link": 64
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "Preview3D",
+        "Camera Info": {
+          "position": {
+            "x": -3.646177949777168,
+            "y": 9.664118626680045,
+            "z": 6.385200034619349
+          },
+          "target": {
+            "x": -0.192236949088388,
+            "y": 1.5578542565029074,
+            "z": 0.0467495872798568
+          },
+          "zoom": 1,
+          "cameraType": "perspective"
+        },
+        "Material Mode": "normal",
+        "Show Grid": true
+      },
+      "widgets_values": [
+        "D:/AIImage/ComfyUI_windows_portable_nvidia_3D/ComfyUI_windows_portable/ComfyUI/output/craftsman_mesh_7bc4ceeb.glb",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      17,
+      8,
+      0,
+      9,
+      1,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      20,
+      8,
+      0,
+      10,
+      0,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      21,
+      10,
+      0,
+      11,
+      1,
+      "LATENT"
+    ],
+    [
+      22,
+      8,
+      0,
+      11,
+      0,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      23,
+      11,
+      0,
+      12,
+      0,
+      "GEOMETRY_VF"
+    ],
+    [
+      24,
+      12,
+      0,
+      3,
+      0,
+      "STRING"
+    ],
+    [
+      25,
+      9,
+      1,
+      10,
+      1,
+      "IMAGE_PIL"
+    ],
+    [
+      31,
+      2,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      57,
+      14,
+      1,
+      23,
+      1,
+      "MASK"
+    ],
+    [
+      58,
+      14,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      60,
+      23,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      61,
+      25,
+      1,
+      26,
+      1,
+      "IMAGE_PIL"
+    ],
+    [
+      62,
+      26,
+      0,
+      27,
+      1,
+      "LATENT"
+    ],
+    [
+      63,
+      27,
+      0,
+      28,
+      0,
+      "GEOMETRY_VF"
+    ],
+    [
+      64,
+      28,
+      0,
+      29,
+      0,
+      "STRING"
+    ],
+    [
+      65,
+      14,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      66,
+      8,
+      0,
+      25,
+      1,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      67,
+      8,
+      0,
+      26,
+      0,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      68,
+      8,
+      0,
+      27,
+      0,
+      "CRAFTSMAN_PIPELINE"
+    ],
+    [
+      69,
+      25,
+      0,
+      30,
+      0,
+      "IMAGE"
+    ],
+    [
+      70,
+      9,
+      0,
+      31,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.620921323059155,
+      "offset": [
+        1819.3425688579982,
+        9.917206919612388
+      ]
+    },
+    "ue_links": []
+  },
+  "version": 0.4
+}
