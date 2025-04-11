@@ -18,16 +18,14 @@ This custom node package provides nodes for ComfyUI to generate 3D coarse meshes
 
 1.  **Clone or Download:** Place the `ComfyUI-CraftsManWrapper` folder inside your `ComfyUI/custom_nodes/` directory.
 2.  **Install Dependencies:** Open a terminal/command prompt, navigate to your ComfyUI installation directory (activate your virtual environment if needed), and run:
-    ```bash
-    pip install -r ComfyUI/custom_nodes/ComfyUI-CraftsManWrapper/requirements.txt
-    ```
     *(Ensure `pip` corresponds to the Python environment used by ComfyUI)*.
 
-    **For Portable/Standalone ComfyUI:** You need to run pip using the Python executable included with the portable version. Open a command prompt/terminal in your main portable ComfyUI directory (e.g., `ComfyUI_windows_portable`) and run something like:
+    **For Portable/Standalone ComfyUI:** You need to run pip using the Python executable included with the portable version. Open a command prompt/terminal, navigate to this custom node's directory, and run the install command using the relative path to the embedded Python:
     ```bash
-    python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-CraftsManWrapper\requirements.txt
+    cd ComfyUI\custom_nodes\ComfyUI-CraftsManWrapper
+    ..\..\..\python_embeded\python.exe -m pip install -r requirements.txt
     ```
-    *(Adjust the path to `python.exe` if your portable version structure is different)*.
+    *(Adjust the relative path to `python.exe` (`..\..\..`) if your portable version structure or custom node location is different)*.
 3.  **Download Model:**
     *   **Option A (Recommended - Local):** Download the `config.yaml` and `model.ckpt` for the desired CraftsMan model (e.g., craftsman-DoraVAE) using the links/methods provided in the official CraftsMan3D repository. Create a folder (e.g., `craftman-DoraVAE`) *outside* your `ComfyUI` directory (e.g., alongside it) and place the downloaded files inside.
     *   **Option B (Hugging Face - May Require Login/Availability):** The nodes can attempt to download from a Hugging Face Hub ID (like `craftsman3d/craftsman-doravae`) if a local path isn't found or specified, but this may fail if the repository is private, gated, or not yet fully uploaded.
