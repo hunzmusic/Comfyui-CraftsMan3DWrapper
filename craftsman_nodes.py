@@ -458,11 +458,19 @@ class SaveCraftsManMesh:
             )
 
             # --- Saving Output ---
-            output_dir = folder_paths.get_output_directory() # Save to standard output dir
-            os.makedirs(output_dir, exist_ok=True)
+            output_dir_base = folder_paths.get_output_directory() # Base ComfyUI output dir
 
-            # Create a unique filename
-            # Use hash of vertices/faces data for more deterministic naming if needed
+            # Separate potential subdirectory from the base filename in the prefix
+            prefix_dir, prefix_filename = os.path.split(output_filename_prefix)
+
+            # Construct the full target directory path including any subdirectory from the prefix
+            target_output_dir = os.path.join(output_dir_base, prefix_dir)
+            os.makedirs(target_output_dir, exist_ok=True)
+            # Add check to ensure directory was created
+            if not os.path.isdir(target_output_dir):
+                raise RuntimeError(f"Failed to create output subdirectory: {target_output_dir}. Check permissions or path validity.")
+
+            # Create a unique filename part (hash + extension)
             try:
                 vf_hash = hashlib.sha256(vertices_np.tobytes() + faces_np.tobytes()).hexdigest()[:8]
             except:
@@ -472,8 +480,11 @@ class SaveCraftsManMesh:
             if file_type_clean not in ["obj", "glb", "ply"]:
                 print(f"[ComfyUI-CraftsManWrapper] SaveMesh: Warning - Invalid file_type '{file_type}', defaulting to 'obj'.")
                 file_type_clean = "obj"
-            filename = f"{output_filename_prefix}_{vf_hash}.{file_type_clean}"
-            filepath = os.path.join(output_dir, filename)
+            # Combine the base filename from prefix (if any) with hash and extension
+            filename_part = f"{prefix_filename}_{vf_hash}.{file_type_clean}"
+
+            # Construct the final filepath
+            filepath = os.path.join(target_output_dir, filename_part)
 
             print(f"[ComfyUI-CraftsManWrapper] SaveMesh: Exporting mesh to: {filepath} (Format: {file_type_clean})")
             mesh.export(filepath, include_normals=True, file_type=file_type_clean)
@@ -686,37 +697,47 @@ class CraftsManDoraVAEGenerator:
             )
             print(f"[ComfyUI-CraftsManWrapper] Mesh generation and post-processing complete.")
 
-        except Exception as e:
-             print(f"[ComfyUI-CraftsManWrapper] Error during mesh generation: {e}")
-             # Attempt to move model off GPU before raising error
-             comfy.model_management.unload_model_clones(pipeline.system)
-             raise RuntimeError(f"Mesh generation failed: {e}")
+            # --- Saving Output --- within the main try block ---
+            output_dir_base = folder_paths.get_output_directory() # Base ComfyUI output dir
 
-        # --- Saving Output ---
-        output_dir = folder_paths.get_output_directory() # Save to standard output dir
-        os.makedirs(output_dir, exist_ok=True)
+            # Separate potential subdirectory from the base filename in the prefix
+            prefix_dir, prefix_filename = os.path.split(output_filename_prefix)
 
-        # Create a unique filename based on inputs to avoid collisions
-        try:
-            img_hash = hashlib.sha256(image.cpu().numpy().tobytes()).hexdigest()[:8]
-        except:
-            img_hash = "noimg" # Fallback if hashing fails
-        inputs_hash = hashlib.md5(f"{model_path}{seed}{steps}{guidance_scale}{octree_depth}{foreground_ratio}{force_remove_bg}{only_max_component}{img_hash}".encode()).hexdigest()[:8]
-        filename = f"{output_filename_prefix}_{inputs_hash}.obj"
-        filepath = os.path.join(output_dir, filename)
+            # Construct the full target directory path including any subdirectory from the prefix
+            target_output_dir = os.path.join(output_dir_base, prefix_dir)
+            os.makedirs(target_output_dir, exist_ok=True)
+            # Add check to ensure directory was created
+            if not os.path.isdir(target_output_dir):
+                raise RuntimeError(f"Failed to create output subdirectory: {target_output_dir}. Check permissions or path validity.")
 
-        try:
+            # Create a unique filename part (hash + extension)
+            try:
+                img_hash = hashlib.sha256(image.cpu().numpy().tobytes()).hexdigest()[:8]
+            except:
+                img_hash = "noimg" # Fallback if hashing fails
+            inputs_hash = hashlib.md5(f"{model_path}{seed}{steps}{guidance_scale}{octree_depth}{foreground_ratio}{force_remove_bg}{only_max_component}{img_hash}".encode()).hexdigest()[:8]
+            # Combine the base filename from prefix (if any) with hash and extension (defaulting to obj)
+            filename_part = f"{prefix_filename}_{inputs_hash}.obj"
+
+            # Construct the final filepath
+            filepath = os.path.join(target_output_dir, filename_part)
+
             print(f"[ComfyUI-CraftsManWrapper] Exporting mesh to: {filepath}")
-            mesh.export(filepath, include_normals=True, file_type='obj')
+            mesh.export(filepath, include_normals=True, file_type='obj') # All-in-one node defaults to obj
             print(f"[ComfyUI-CraftsManWrapper] Mesh exported successfully.")
-        except Exception as e:
-            print(f"[ComfyUI-CraftsManWrapper] Error exporting mesh: {e}")
-            raise RuntimeError(f"Failed to export mesh: {e}")
-        finally:
-            # Move model back to CPU after use to free VRAM (handled by ComfyUI's model management ideally)
-            # comfy.model_management.unload_model_clones(pipeline.system) # Let ComfyUI manage this
-            pass
 
+        except Exception as e:
+             print(f"[ComfyUI-CraftsManWrapper] Error during mesh generation or saving: {e}")
+             # Attempt to move model off GPU before raising error
+             # Check if pipeline was successfully loaded before trying to unload
+             if 'pipeline' in locals() and pipeline is not None and hasattr(pipeline, 'system'):
+                 comfy.model_management.unload_model_clones(pipeline.system)
+             raise RuntimeError(f"Mesh generation or saving failed: {e}")
+        finally:
+            # Ensure model is unloaded even if saving fails but generation succeeded
+            # Check if pipeline was successfully loaded before trying to unload
+            if 'pipeline' in locals() and pipeline is not None and hasattr(pipeline, 'system'):
+                 comfy.model_management.unload_model_clones(pipeline.system) # Let ComfyUI manage this
 
         return (filepath,)
 
