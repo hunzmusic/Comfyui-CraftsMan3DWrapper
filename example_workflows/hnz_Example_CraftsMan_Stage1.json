@@ -1,7 +1,7 @@
 {
   "id": "38c5b16a-bb22-46f8-921b-14d25642be68",
   "revision": 0,
-  "last_node_id": 38,
+  "last_node_id": 39,
   "last_link_id": 70,
   "nodes": [
     {
@@ -199,9 +199,7 @@
         "ver": "0.3.27",
         "Node name for S&R": "PreviewImage"
       },
-      "widgets_values": [
-        ""
-      ]
+      "widgets_values": []
     },
     {
       "id": 31,
@@ -230,9 +228,7 @@
         "ver": "0.3.27",
         "Node name for S&R": "PreviewImage"
       },
-      "widgets_values": [
-        ""
-      ]
+      "widgets_values": []
     },
     {
       "id": 32,
@@ -612,44 +608,6 @@
       ]
     },
     {
-      "id": 8,
-      "type": "LoadCraftsManPipeline",
-      "pos": [
-        -313.1583557128906,
-        304.3298034667969
-      ],
-      "size": [
-        355.4958801269531,
-        58
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "pipeline",
-          "type": "CRAFTSMAN_PIPELINE",
-          "links": [
-            17,
-            20,
-            22,
-            66,
-            67,
-            68
-          ]
-        }
-      ],
-      "properties": {
-        "aux_id": "hunzmusic/Comfyui-CraftsManWrapper",
-        "ver": "37ee4f6633cac9fef3a08b457ad0fbee556072dd",
-        "Node name for S&R": "LoadCraftsManPipeline"
-      },
-      "widgets_values": [
-        "ComfyUI\\models\\craftman-DoraVAE"
-      ]
-    },
-    {
       "id": 35,
       "type": "Note",
       "pos": [
@@ -661,7 +619,7 @@
         186.54776000976562
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -671,46 +629,6 @@
       ],
       "color": "#432",
       "bgcolor": "#653"
-    },
-    {
-      "id": 2,
-      "type": "LoadImage",
-      "pos": [
-        -1254.2076416015625,
-        851.7982788085938
-      ],
-      "size": [
-        315,
-        314
-      ],
-      "flags": {},
-      "order": 5,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            31
-          ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.3.27",
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "ComfyUI_temp_fqldt_00113_.png",
-        "image",
-        ""
-      ]
     },
     {
       "id": 14,
@@ -820,27 +738,105 @@
       "widgets_values": []
     },
     {
-      "id": 36,
-      "type": "Note",
+      "id": 8,
+      "type": "LoadCraftsManPipeline",
       "pos": [
-        -320.10955810546875,
-        69.74047088623047
+        -313.1583557128906,
+        304.3298034667969
       ],
       "size": [
-        625.3037109375,
-        186.54776000976562
+        432.40789794921875,
+        58
       ],
       "flags": {},
-      "order": 6,
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "CRAFTSMAN_PIPELINE",
+          "links": [
+            17,
+            20,
+            22,
+            66,
+            67,
+            68
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "hunzmusic/Comfyui-CraftsManWrapper",
+        "ver": "37ee4f6633cac9fef3a08b457ad0fbee556072dd",
+        "Node name for S&R": "LoadCraftsManPipeline"
+      },
+      "widgets_values": [
+        "CraftsMan3D\\craftsman3d_doravae_bf16.safetensors"
+      ]
+    },
+    {
+      "id": 39,
+      "type": "MarkdownNote",
+      "pos": [
+        -310.496826171875,
+        141.69509887695312
+      ],
+      "size": [
+        394.30224609375,
+        101.18973541259766
+      ],
+      "flags": {},
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "You need to download the checkpoint for this.  It isn't on huggingface yet.  \n\nhttps://github.com/wyysf-98/CraftsMan3D\nIf you read the USAGE it has these lines that you can copy and paste into a browser to autodownload.\n\n# wget https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/config.yaml \n# wget https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/model.ckpt (5gigs)\n\n\nYou need to place both .yaml and .ckpt in ComfyUI\\models\\craftman-DoraVAE\n\nYou can also place it anywhere, just copy the path below."
+        "Model links:\n\n[https://huggingface.co/Kijai/craftsman3d_safetensors/tree/main](https://huggingface.co/Kijai/craftsman3d_safetensors/tree/main)"
       ],
       "color": "#432",
       "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        -1254.2076416015625,
+        851.7982788085938
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            31
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "thing.png",
+        "image",
+        ""
+      ]
     }
   ],
   "links": [
@@ -1070,13 +1066,17 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6209213230591554,
+      "scale": 0.4736244074476892,
       "offset": [
-        1606.069781599998,
-        -284.74319880000274
+        2473.5951850460315,
+        -78.93598032144871
       ]
     },
-    "ue_links": []
+    "ue_links": [],
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }
