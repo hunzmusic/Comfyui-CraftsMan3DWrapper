@@ -112,13 +112,15 @@ class LoadCraftsManPipeline:
     def INPUT_TYPES(s):
         # Define default model path - adjust if needed
         default_model_path = "craftsman3d/craftsman-doravae"
-        # Check if local model exists relative to the MAIN project dir (one level above ComfyUI)
-        main_project_dir = os.path.abspath(os.path.join(comfyui_root, '..'))
-        local_model_path = os.path.join(main_project_dir, 'craftman-DoraVAE')
+        # Check if local model exists inside ComfyUI's models directory
+        # Get the base models directory used by ComfyUI
+        model_dir = folder_paths.get_folder_paths("checkpoints")[0] # Often checkpoints/models share base path
+        # Construct the expected path within the models directory
+        local_model_path = os.path.join(model_dir, 'craftman-DoraVAE')
 
         if os.path.isdir(local_model_path):
              default_model_path = local_model_path
-             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Defaulting to local model path: {local_model_path}")
+             print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Defaulting to local model path in ComfyUI models: {local_model_path}")
         else:
              print(f"[ComfyUI-CraftsManWrapper] LoadCraftsManPipeline: Local model path '{local_model_path}' not found. Defaulting to Hugging Face ID.")
 
@@ -495,14 +497,13 @@ class CraftsManDoraVAEGenerator:
     def INPUT_TYPES(s):
         # Define default model path - adjust if needed
         default_model_path = "craftsman3d/craftsman-doravae"
-        # Check if local model exists relative to the MAIN project dir (one level above ComfyUI)
-        # This allows users to keep large models outside the custom_nodes folder
-        main_project_dir = os.path.abspath(os.path.join(comfyui_root, '..'))
-        local_model_path = os.path.join(main_project_dir, 'craftman-DoraVAE')
+        # Check if local model exists inside ComfyUI's models directory
+        model_dir = folder_paths.get_folder_paths("checkpoints")[0] # Use the same logic as the loader node
+        local_model_path = os.path.join(model_dir, 'craftman-DoraVAE')
 
         if os.path.isdir(local_model_path):
              default_model_path = local_model_path
-             print(f"[ComfyUI-CraftsManWrapper] Defaulting to local model path: {local_model_path}")
+             print(f"[ComfyUI-CraftsManWrapper] Generator: Defaulting to local model path in ComfyUI models: {local_model_path}")
         else:
              print(f"[ComfyUI-CraftsManWrapper] Local model path '{local_model_path}' not found. Defaulting to Hugging Face ID.")
 
