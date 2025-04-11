@@ -27,19 +27,14 @@ This custom node package provides nodes for ComfyUI to generate 3D coarse meshes
     ```
     *(Adjust the relative path to `python.exe` (`..\..\..`) if your portable version structure or custom node location is different)*.
 3.  **Download Model:**
-    *   **Option A (Recommended - Local):** Download the `config.yaml` and `model.ckpt` for the desired CraftsMan model (e.g., craftsman-DoraVAE). You can often find download links or instructions in the official model repository. For example, the original CraftsMan3D README provided these `wget` commands for the DoraVAE version:
-        ```bash
-        # Create directories (adjust path as needed, e.g., inside ComfyUI/models/)
-        # mkdir ComfyUI/models/craftman-DoraVAE
-        # cd ComfyUI/models/craftman-DoraVAE
+        Safetensors conversions of the original model, to `ComfyUI/checkpoints/CraftsMan3D` (subfolder optional):
 
-        # Download files and save into your target model folder
-        https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/config.yaml
+        https://huggingface.co/Kijai/craftsman3d_safetensors/tree/main
+
+    Original model:
+
         https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/model.ckpt
-        ```
-        Create a folder (e.g., `craftman-DoraVAE`) ideally inside your `ComfyUI/models/` directory (or alongside the `ComfyUI` folder) and place the downloaded `config.yaml` and `model.ckpt` files inside it. Then, point the `model_path` input in the node to this folder.
-    *   **Option B (Hugging Face - May Require Login/Availability):** The nodes can attempt to download from a Hugging Face Hub ID (like `craftsman3d/craftsman-doravae`) if a local path isn't found or specified, but this may fail if the repository is private, gated, or not yet fully uploaded.
-
+        
 ## Usage
 
 ### All-in-One Node

@@ -12,3 +12,4 @@ safetensors
 pytorch-lightning # Base system class dependency, might be optional for pure inference
 scikit-image # Potential dependency for marching cubes
 PyMCubes # Potential dependency for marching cubes
+accelerate
