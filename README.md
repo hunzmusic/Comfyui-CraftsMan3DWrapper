@@ -33,13 +33,12 @@ This custom node package provides nodes for ComfyUI to generate 3D coarse meshes
         # mkdir ComfyUI/models/craftman-DoraVAE
         # cd ComfyUI/models/craftman-DoraVAE
 
-        # Download files into your target model folder
-        wget https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/config.yaml
-        wget https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/model.ckpt
+        # Download files and save into your target model folder
+        https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/config.yaml
+        https://pub-c7137d332b4145b6b321a6c01fcf8911.r2.dev/craftsman-DoraVAE/model.ckpt
         ```
         Create a folder (e.g., `craftman-DoraVAE`) ideally inside your `ComfyUI/models/` directory (or alongside the `ComfyUI` folder) and place the downloaded `config.yaml` and `model.ckpt` files inside it. Then, point the `model_path` input in the node to this folder.
     *   **Option B (Hugging Face - May Require Login/Availability):** The nodes can attempt to download from a Hugging Face Hub ID (like `craftsman3d/craftsman-doravae`) if a local path isn't found or specified, but this may fail if the repository is private, gated, or not yet fully uploaded.
-4.  **Restart ComfyUI:** The nodes should appear under the "generation/3d/craftsman" category (or "generation/3d" for the all-in-one node).
 
 ## Usage
 
