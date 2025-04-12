@@ -16,13 +16,13 @@ This custom node package provides nodes for ComfyUI to generate 3D coarse meshes
 
 ## Installation
 
-1.  **Clone or Download:** Place the `ComfyUI-CraftsManWrapper` folder inside your `ComfyUI/custom_nodes/` directory.
+1.  **Clone or Download:** Place the `ComfyUI-CraftsMan3DWrapper` folder inside your `ComfyUI/custom_nodes/` directory.
 2.  **Install Dependencies:** Open a terminal/command prompt, navigate to your ComfyUI installation directory (activate your virtual environment if needed), and run:
     *(Ensure `pip` corresponds to the Python environment used by ComfyUI)*.
 
     **For Portable/Standalone ComfyUI:** You need to run pip using the Python executable included with the portable version. Open a command prompt/terminal, navigate to this custom node's directory, and run the install command using the relative path to the embedded Python:
     ```bash
-    cd ComfyUI\custom_nodes\ComfyUI-CraftsManWrapper
+    cd ComfyUI\custom_nodes\ComfyUI-CraftsMan3DWrapper
     ..\..\..\python_embeded\python.exe -m pip install -r requirements.txt
     ```
     *(Adjust the relative path to `python.exe` (`..\..\..`) if your portable version structure or custom node location is different)*.
