@@ -688,5 +688,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PreprocessImageCraftsMan": "Preprocess Image (CraftsMan)",
     "SampleCraftsManLatents": "Sample CraftsMan Latents",
     "DecodeCraftsManLatents": "Decode CraftsMan Latents",
-    "SaveCraftsManMesh": "Save CraftsMan Mesh (OBJ)",
+    "SaveCraftsManMesh": "Save CraftsMan Mesh", # Renamed
 }
