@@ -1,15 +1,15 @@
 [project]
-name = "Comfyui-CraftsMan3DWrapper"
+name = "ComfyUI-CraftsMan3DWrapper"
 description = "A wrapper for CraftsMan"
-version = "1.0.0"
+version = "1.0.1"
 license = {file = "LICENSE"}
 dependencies = ["numpy", "Pillow", "trimesh", "rembg", "omegaconf", "PyYAML>=6.0 # Dependency for omegaconf", "diffusers", "transformers", "huggingface-hub", "einops", "safetensors", "pytorch-lightning # Base system class dependency, might be optional for pure inference", "scikit-image # Potential dependency for marching cubes", "PyMCubes # Potential dependency for marching cubes", "accelerate"]
 
 [project.urls]
-Repository = "https://github.com/hunzmusic/Comfyui-CraftsMan3DWrapper"
+Repository = "https://github.com/hunzmusic/ComfyUI-CraftsMan3DWrapper"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
 PublisherId = "hunzmusic"
-DisplayName = "Comfyui-CraftsMan3DWrapper"
+DisplayName = "ComfyUI-CraftsMan3DWrapper"
 Icon = ""

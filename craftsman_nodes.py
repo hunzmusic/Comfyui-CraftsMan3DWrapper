@@ -1,4 +1,4 @@
-import os
+comfy node initimport os
 import sys
 import torch
 import numpy as np
