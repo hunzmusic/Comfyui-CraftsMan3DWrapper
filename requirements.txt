@@ -13,3 +13,14 @@ pytorch-lightning # Base system class dependency, might be optional for pure inf
 scikit-image # Potential dependency for marching cubes
 PyMCubes # Potential dependency for marching cubes
 accelerate
+tqdm # Used for progress bars in node script
+onnxruntime # Dependency for rembg
+numba==0.59.1 # Pinning version for stability with rembg/pymatting
+jaxtyping # Used for type hints in craftsman library
+typeguard # Used for type hints in craftsman library
+timm # PyTorch Image Models, used in attention layers
+matplotlib # Used in craftsman.utils.saving
+packaging # Used for version parsing in craftsman.utils.misc
+opencv-python # Used in craftsman.utils.saving (cv2)
+imageio # Used in craftsman.utils.saving
+wandb # Imported in craftsman.utils.saving, needed even if not used for logging
